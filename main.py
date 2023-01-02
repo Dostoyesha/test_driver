@@ -3,20 +3,8 @@ import asyncio
 from aiohttp import web
 
 from api import get_channels_condition, post_channel_on, post_channel_off
-
-
-def log_params(func):
-    async def wrapper(*args, **kwargs):
-        print("Time now is 0000")
-        return await func(*args, **kwargs)
-    return wrapper
-
-
-@log_params
-async def get_condition():
-    while True:
-        print("Condition from power supply is U, I, P")
-        await asyncio.sleep(5)
+from driver_utils import get_condition
+from power_source_utils import PowerSupplyConnector
 
 
 async def main():
@@ -36,7 +24,7 @@ async def main():
     await task
 
     while True:
-        await asyncio.sleep(1)
+        await asyncio.sleep(3600)
 
 
 if __name__ == '__main__':

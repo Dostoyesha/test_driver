@@ -1,26 +1,42 @@
-from power_source_utils import PowerSupplyConnector
+import asyncio
+
+
+def log_params(func):
+    async def wrapper(*args, **kwargs):
+        print("Time now is 0000")
+        return await func(*args, **kwargs)
+    return wrapper
 
 
 class PSCommandsHandler:
     """
     команды и запросы для тестирования источника
-    метод для регулярного запроса состояния
     кастомное оформление вывода
 
     декоратор для логирования в файл рег.опросов сделать рядом
 
-    асинк?
     """
-    def __init__(self):
-        self.ps_conn = PowerSupplyConnector()
-        self.ps_conn.connect()  # todo disconnect
+    def __init__(self, conn):
+        self.conn = conn
 
-    def get_conditions(self):
-        return {}
+    def _prepare_conditions_data(self, data):
+        result = {}
+        pass
+        return result
 
-    def channel_on(self, channel_number, voltage, current):
+    async def get_conditions(self):
+        raw_data = self.conn.get_conditions()
+        return self._prepare_conditions_data(raw_data)
+
+    async def channel_on(self, channel_number, voltage, current):
         pass
 
-    def channel_off(self, channel_number):
+    async def channel_off(self, channel_number):
         pass
 
+
+@log_params
+async def get_condition():
+    while True:
+        print("Condition from power supply is U, I, P")
+        await asyncio.sleep(5)

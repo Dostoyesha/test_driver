@@ -1,10 +1,20 @@
 from aiohttp import web
 
+from driver_utils import PSCommandsHandler
+from power_source_utils import PowerSupplyConnector
+
 
 async def get_channels_condition(request):
-    print('Request GET')
-    result = {'hello', 'word'}
-    return web.Response(text=str(result))
+
+    ps = PowerSupplyConnector()
+    await ps.connect()
+
+    handler = PSCommandsHandler(ps)
+    conditions_data = handler.get_conditions()
+
+    await ps.disconnect()
+
+    return web.Response(text=str(conditions_data))
     # return web.Response(text=json.dumps(result, ensure_ascii=False))
 
 
