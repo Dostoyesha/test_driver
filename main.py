@@ -4,7 +4,6 @@ from aiohttp import web
 
 from api import get_channels_condition, post_channel_on, post_channel_off
 from driver_utils import get_condition
-from power_source_utils import PowerSupplyConnector
 
 
 async def main():
