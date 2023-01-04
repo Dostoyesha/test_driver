@@ -12,14 +12,12 @@ class PowerSupplyConnector:
 
     def __init__(self):
         # self.__resource = "TCPIP0::169.254.129.17::1026::SOCKET"
-        self.ch_count = 4  # todo в инит аргумент или конфиг
+        self.ch_count = 4   # todo в инит аргумент или конфиг
         self._s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     async def connect(self):
-        try:
-            self._s.connect(('169.254.129.17', 1026))
-        except:
-            pass    # todo
+        self._s.connect(('127.0.0.1', 9090))
+        # self._s.connect(('169.254.129.17', 1026))   # todo
 
     async def disconnect(self):
         self._s.close()
