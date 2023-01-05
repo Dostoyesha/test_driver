@@ -1,27 +1,23 @@
 import socket
 
+from config import POWER_SUPPLY_HOST, POWER_SUPPLY_PORT
+from utils import log_ch_measures
+
 
 class PowerSupplyConnector:
-    """TCP/IP  SCPI
-    комманды самому источнику питания
-    сбор команды согласно протоколу в нужном формате
+    """TCP/IP connector to Power Supply with SCPI commands."""
 
-    except
-    log
-    """
-
-    def __init__(self):
-        # self.__resource = "TCPIP0::169.254.129.17::1026::SOCKET"
-        self.ch_count = 4   # todo в инит аргумент или конфиг
+    def __init__(self, ch_count):
+        self.ch_count = ch_count
         self._s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    async def connect(self):
-        self._s.connect(('127.0.0.1', 9090))
-        # self._s.connect(('169.254.129.17', 1026))   # todo
+    def connect(self):
+        self._s.connect((POWER_SUPPLY_HOST, POWER_SUPPLY_PORT))  # todo try except
 
-    async def disconnect(self):
+    def disconnect(self):
         self._s.close()
 
+    @log_ch_measures
     async def get_ch_measures(self, ch_number):
         self._s.sendall(f':MEASure{ch_number}:ALL?\n'.encode())
         return self._s.recv(4096)
