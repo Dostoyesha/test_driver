@@ -4,16 +4,13 @@ from aiohttp import web
 
 from utils import prepare_condition_data
 
-routes = web.RouteTableDef()
 
-
-@routes.get('/condition')
 async def get_channels_condition(request):
     conn = request.app.ps
     ch_count = conn.ch_count
 
     try:
-        ch_measures_map = {ch: await conn.get_ch_measures(ch) for ch in range(ch_count + 1)}
+        ch_measures_map = {ch: await conn.get_ch_measures(ch) for ch in range(1, ch_count + 1)}
         data = prepare_condition_data(ch_measures_map)
         code, response = 200, data
     except Exception as error:
@@ -22,7 +19,6 @@ async def get_channels_condition(request):
     return web.Response(text=json.dumps(response), status=code)
 
 
-@routes.post('/channel_on')
 async def post_channel_on(request):
     """Not completed"""
 
@@ -35,9 +31,9 @@ async def post_channel_on(request):
     if ch and current and voltage:
         ch, current, voltage = int(ch), float(current), float(voltage)
         try:
-            conn.set_current(ch, current)
-            conn.set_voltage(ch, voltage)
-            conn.turn_on_ch_output(ch)
+            await conn.set_current(ch, current)
+            await conn.set_voltage(ch, voltage)
+            await conn.turn_on_ch_output(ch)
 
             code, response = 200, {'message': f'Channel {ch} turned ON with measures: U {voltage}, I {current}.'}
 
@@ -50,7 +46,6 @@ async def post_channel_on(request):
     return web.Response(text=json.dumps(response), status=code)
 
 
-@routes.post('/channel_off')
 async def post_channel_off(request):
     conn = request.app.ps
     ch = request.query.get('ch')
@@ -58,7 +53,7 @@ async def post_channel_off(request):
     if ch:
         ch = int(ch)
         try:
-            conn.turn_off_ch_output(ch)
+            await conn.turn_off_ch_output(ch)
             code, response = 200, {'message': f'Channel {ch} turned OFF.'}
 
         except Exception as error:

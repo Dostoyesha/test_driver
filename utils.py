@@ -1,41 +1,37 @@
 import asyncio
+import datetime
+
+from config import TELEMETRY_REQUEST_TASK_SEC_PERIOD, TELEMETRY_LOG_FILE_PATH
 
 
 def parse_ch_measures(raw_data):
     """
-    Not completed.
+    Не нашла в документации адекватный пример ответа устройства.
+    Предположим, на команду
+    'MEASure1:ALL?\n'
+    он выглядит так (ток, напряжение и мощность соответственно):
+    '4.10466677,-3.13684184,1.75743178\n'
 
-    :param raw_data: ':SOMEdata:current:voltage:power'
+    :param raw_data: '4.10466677,-3.13684184,1.75743178\n'
     :return:
-        {'current': '1.0001',
-        'voltage': '2.0002',
-        'power': '3'}
+        {'current': 4.10466677,
+        'voltage': -3.13684184,
+        'power': 1.75743178}
     """
-    result = {
-        'current': None,
-        'voltage': None,
-        'power': None
-    }
-    # todo
-    return {'current': '1.0001',
-            'voltage': '2.0002',
-            'power': '3'}
+    result = {}
+
+    if raw_data:
+        measures = [float(measure) for measure in raw_data.strip('\n :,').split(',')]
+
+        if measures and len(measures) == 3:
+            result['current'] = measures[0]
+            result['voltage'] = measures[1]
+            result['power'] = measures[2]
+
+    return result
 
 
 def prepare_ch_measures_data(ch, raw_data):
-    """
-    Not completed.
-
-    :param ch: number of channel
-    :param raw_data: data from ps 'some U I P' to parsing
-
-    :return: dict of channel params
-        {'channel': '1',
-        'current': '1.0001',
-        'voltage': '2.0002',
-        'power': '3'}
-    """
-    # todo
     result = {'channel': ch}
 
     measures = parse_ch_measures(raw_data)
@@ -47,49 +43,51 @@ def prepare_ch_measures_data(ch, raw_data):
 def prepare_condition_data(ch_measures_map):
     """
     :param ch_measures_map: dict with key - channel number, value - measures data from ps
-        {1: 'measures data',
-        2: 'measures data'}
+        {1: '4.10466677,-3.13684184,1.75743178\n',
+        ..}
 
     :returns list of dicts with measures of channel
-        [{'channel': '1',
-        'current': '1.0001',
-        'voltage': '2.0002',
-        'power': '3'},
-        {'channel': '2',
-        'current': '3.0001',
-        'voltage': '4.0002',
-        'power': '5'},
-        ..
-        ]
+        {'conditions': [
+            {'channel': 1,
+            'current': 4.10466677,
+            'voltage': -3.13684184,
+            'power': 1.75743178},
+            ..]
+        }
+
     """
-    return [prepare_ch_measures_data(ch, data) for ch, data in ch_measures_map]
+    conditions = [prepare_ch_measures_data(ch, data) for ch, data in ch_measures_map.items()]
+    return {'conditions': conditions}
 
 
 def log_ch_measures(func):
-    """
-    Not comleted.
 
-    :param func:
-    :return:
-    """
     async def wrapper(*args, **kwargs):
-        raw_data = await func(*args, **kwargs)
-        data = parse_ch_measures(raw_data)
-        print(data)  # todo to file
+        time = datetime.datetime.now()
+        ch = args[1]
+
+        result = await func(*args, **kwargs)
+
+        try:
+            data = parse_ch_measures(result)
+
+            current, voltage, power = data['current'], data['voltage'], data['power']
+            message = f'CURRENT {current}, VOLTAGE {voltage}, POWER {power}'
+        except Exception as e:
+            message = f'Error by measures getting. Invalid data from PS: {result}'
+
+        log = f'TIME {time}:  CH {ch}:  {message}\n'
+
+        with open(TELEMETRY_LOG_FILE_PATH, 'a') as f:
+            f.write(log)
+
+        return result
     return wrapper
 
 
 async def task_get_condition(ps_conn):
-    """
-    Not completed.
-
-    :param ps_conn:
-    :return:
-    """
     while True:
-        for ch in range(ps_conn.ch_count + 1):
-            raw_data = await ps_conn.get_ch_measures(ch)
-            # data = await get_ch_measures_data(ch, raw_data)
-            # todo log data with time
+        for ch in range(1, ps_conn.ch_count + 1):
+            await ps_conn.get_ch_measures(ch)
 
-        await asyncio.sleep(10)
+        await asyncio.sleep(TELEMETRY_REQUEST_TASK_SEC_PERIOD)

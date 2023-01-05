@@ -20,10 +20,9 @@ class PowerSupplyConnector:
     @log_ch_measures
     async def get_ch_measures(self, ch_number):
         self._s.sendall(f':MEASure{ch_number}:ALL?\n'.encode())
-        return self._s.recv(4096)
+        return self._s.recv(4096).decode()
 
     async def set_current(self, ch_number, current):
-        # :SOURce2:CURRent 1.0005
         self._s.sendall(f':SOURce{ch_number}:CURRent {current}\n'.encode())
 
     async def set_voltage(self, ch_number, voltage):
@@ -34,5 +33,3 @@ class PowerSupplyConnector:
 
     async def turn_off_ch_output(self, ch_number):
         self._s.sendall(f':OUTPut{ch_number}:STATe OFF\n'.encode())
-
-
