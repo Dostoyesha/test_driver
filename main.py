@@ -12,7 +12,7 @@ async def app_run():
     app = web.Application()
 
     app.router.add_get('/condition', get_channels_condition)
-    # app.router.add_post('/channel_on', post_channel_on)   # todo not completed
+    # app.router.add_post('/channel_on', post_channel_on)   # not completed
     app.router.add_post('/channel_off', post_channel_off)
 
     runner = web.AppRunner(app)
@@ -22,11 +22,10 @@ async def app_run():
     await site.start()
 
     ps_conn = PowerSupplyConnector(ch_count=POWER_SUPPLY_CHANNELS_COUNT)
-
     try:
         ps_conn.connect()
     except Exception as error:
-        print('Connection to Power Supply failed.')
+        print(f'Connection to Power Supply failed: {error}')
         return
 
     app.ps = ps_conn
@@ -37,11 +36,14 @@ async def app_run():
     try:
         while True:
             await asyncio.sleep(3600)
-    except KeyboardInterrupt as e:
-        print(e)
-    finally:
-        app.ps.disconnect()  # todo
+    except Exception:
+        ps_conn.disconnect()
 
 
 if __name__ == '__main__':
-    asyncio.run(app_run())
+    try:
+        asyncio.run(app_run())
+    except KeyboardInterrupt:
+        print('App is stopped.')
+    except Exception as error:
+        print(f'App is crashed by error: {error}.')

@@ -14,14 +14,9 @@ def ps_run():
     try:
         while True:
             data = conn.recv(1024)
-            print(f'Request: {data}')
-            if not data:
-                break
-
             conn.sendall('4.10466677,-3.13684184,1.75743178\n'.encode())
-            print(f'Response: 4.10466677,-3.13684184,1.75743178\n')
-    except:
-        pass
+    except Exception as error:
+        print(f'Error: {error}')
     finally:
         sock.close()
 

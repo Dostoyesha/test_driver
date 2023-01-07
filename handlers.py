@@ -20,7 +20,7 @@ async def get_channels_condition(request):
 
 
 async def post_channel_on(request):
-    """Not completed"""
+    """todo complete"""
 
     conn = request.app.ps
 
