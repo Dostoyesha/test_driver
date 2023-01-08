@@ -12,7 +12,7 @@ class PowerSupplyConnector:
         self._s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     def connect(self):
-        self._s.connect((POWER_SUPPLY_HOST, POWER_SUPPLY_PORT))  # todo try except
+        self._s.connect((POWER_SUPPLY_HOST, POWER_SUPPLY_PORT))
 
     def disconnect(self):
         self._s.close()

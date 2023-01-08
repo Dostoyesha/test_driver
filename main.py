@@ -17,33 +17,27 @@ async def app_run():
 
     runner = web.AppRunner(app)
     await runner.setup()
-
     site = web.TCPSite(runner, APP_API_HOST, APP_API_PORT)
     await site.start()
 
     ps_conn = PowerSupplyConnector(ch_count=POWER_SUPPLY_CHANNELS_COUNT)
+    app.ps = ps_conn
+
     try:
         ps_conn.connect()
     except Exception as error:
         print(f'Connection to Power Supply failed: {error}')
         return
 
-    app.ps = ps_conn
-
-    task = asyncio.create_task(task_get_condition(ps_conn))
-    await task
-
     try:
+        task = asyncio.create_task(task_get_condition(ps_conn))
+        await task
+
         while True:
             await asyncio.sleep(3600)
-    except Exception:
+    finally:
         ps_conn.disconnect()
 
 
 if __name__ == '__main__':
-    try:
-        asyncio.run(app_run())
-    except KeyboardInterrupt:
-        print('App is stopped.')
-    except Exception as error:
-        print(f'App is crashed by error: {error}.')
+    asyncio.run(app_run())

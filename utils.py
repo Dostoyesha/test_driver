@@ -6,12 +6,6 @@ from config import TELEMETRY_REQUEST_TASK_SEC_PERIOD, TELEMETRY_LOG_FILE_PATH
 
 def parse_ch_measures(raw_data):
     """
-    Не нашла в документации адекватный пример ответа устройства.
-    Предположим, на команду
-    'MEASure1:ALL?\n'
-    он выглядит так (ток, напряжение и мощность соответственно):
-    '4.10466677,-3.13684184,1.75743178\n'
-
     :param raw_data: '4.10466677,-3.13684184,1.75743178\n'
     :return:
         {'current': 4.10466677,
