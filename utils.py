@@ -1,7 +1,7 @@
 import asyncio
 import datetime
 
-from config import TELEMETRY_REQUEST_TASK_SEC_PERIOD, TELEMETRY_LOG_FILE_PATH
+from config import TELEMETRY_REQ_SEC_PERIOD, TELEMETRY_LOG_FILE_PATH
 
 
 def parse_ch_measures(raw_data):
@@ -84,4 +84,4 @@ async def task_get_condition(ps_conn):
         for ch in range(1, ps_conn.ch_count + 1):
             await ps_conn.get_ch_measures(ch)
 
-        await asyncio.sleep(TELEMETRY_REQUEST_TASK_SEC_PERIOD)
+        await asyncio.sleep(TELEMETRY_REQ_SEC_PERIOD)

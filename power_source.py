@@ -17,19 +17,26 @@ class PowerSupplyConnector:
     def disconnect(self):
         self._s.close()
 
+    def _set_command(self, raw_command):
+        return f'{raw_command}\n'.encode()
+
+    def _send_command(self, raw_command):
+        command = self._set_command(raw_command)
+        self._s.sendall(command)
+
     @log_ch_measures
     async def get_ch_measures(self, ch_number):
-        self._s.sendall(f':MEASure{ch_number}:ALL?\n'.encode())
+        self._send_command(f':MEASure{ch_number}:ALL?')
         return self._s.recv(4096).decode()
 
     async def set_current(self, ch_number, current):
-        self._s.sendall(f':SOURce{ch_number}:CURRent {current}\n'.encode())
+        self._send_command(f':SOURce{ch_number}:CURRent {current}')
 
     async def set_voltage(self, ch_number, voltage):
-        self._s.sendall(f':SOURce{ch_number}:VOLTage {voltage}\n'.encode())
+        self._send_command(f':SOURce{ch_number}:VOLTage {voltage}')
 
     async def turn_on_ch_output(self, ch_number):
-        self._s.sendall(f':OUTPut{ch_number}:STATe ON\n'.encode())
+        self._send_command(f':OUTPut{ch_number}:STATe ON')
 
     async def turn_off_ch_output(self, ch_number):
-        self._s.sendall(f':OUTPut{ch_number}:STATe OFF\n'.encode())
+        self._send_command(f':OUTPut{ch_number}:STATe OFF')

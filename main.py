@@ -2,7 +2,7 @@ import asyncio
 
 from aiohttp import web
 
-from config import APP_API_HOST, APP_API_PORT, POWER_SUPPLY_CHANNELS_COUNT
+from config import APP_API_HOST, APP_API_PORT, POWER_SUPPLY_CH_COUNT
 from handlers import get_channels_condition, post_channel_on, post_channel_off
 from utils import task_get_condition
 from power_source import PowerSupplyConnector
@@ -20,7 +20,7 @@ async def app_run():
     site = web.TCPSite(runner, APP_API_HOST, APP_API_PORT)
     await site.start()
 
-    ps_conn = PowerSupplyConnector(ch_count=POWER_SUPPLY_CHANNELS_COUNT)
+    ps_conn = PowerSupplyConnector(ch_count=POWER_SUPPLY_CH_COUNT)
     app.ps = ps_conn
 
     try:

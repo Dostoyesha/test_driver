@@ -12,11 +12,11 @@ async def get_channels_condition(request):
     try:
         ch_measures_map = {ch: await conn.get_ch_measures(ch) for ch in range(1, ch_count + 1)}
         data = prepare_condition_data(ch_measures_map)
-        code, response = 200, data
     except Exception as error:
-        code, response = 502, {'message': 'Error by PS measures getting.', 'error': str(error)}
+        return web.Response(text=json.dumps({'message': 'Error by PS measures getting.', 'error': str(error)}),
+                            status=502)
 
-    return web.Response(text=json.dumps(response), status=code)
+    return web.Response(text=json.dumps(data), status=200)
 
 
 async def post_channel_on(request):
@@ -50,16 +50,15 @@ async def post_channel_off(request):
     conn = request.app.ps
     ch = request.query.get('ch')
 
-    if ch:
-        ch = int(ch)
-        try:
-            await conn.turn_off_ch_output(ch)
-            code, response = 200, {'message': f'Channel {ch} turned OFF.'}
+    if not ch:
+        return web.Response(status=400, text=json.dumps({'message': 'Must be specified ch param.'}))
 
-        except Exception as error:
-            code, response = 502, {'message': f'Error by executing OFF command on PS for channel {ch}.',
-                                   'error': str(error)}
-    else:
-        code, response = 400, {'message': 'Must be specified ch param.'}
+    ch = int(ch)
+    try:
+        await conn.turn_off_ch_output(ch)
+    except Exception as error:
+        data = {'message': f'Error by executing OFF command on PS for channel {ch}.', 'error': str(error)}
+        return web.Response(status=502, text=json.dumps(data))
 
-    return web.Response(text=json.dumps(response), status=code)
+    return web.Response(text=json.dumps({'message': f'Channel {ch} turned OFF.'}), status=200)
+
